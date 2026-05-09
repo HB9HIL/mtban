@@ -34,7 +34,11 @@ jobs:
 
       - name: Inject version from tag
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="0.0.0-dev"
+          fi
           DEBEMAIL="fabian.berg@hb9hil.org" DEBFULLNAME="Fabian Berg" \
             dch -b --newversion "$VERSION" --distribution stable \
                 --force-distribution "Release $VERSION"
