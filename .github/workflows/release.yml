@@ -45,15 +45,16 @@ jobs:
 
       - name: Build .deb
         run: |
-          dpkg-buildpackage -us -uc -b -a${{ matrix.arch }}
+          dpkg-buildpackage -us -uc -b -d -a${{ matrix.arch }}
           mkdir -p artifacts
           mv ../*.deb ../*.changes ../*.buildinfo artifacts/
+          cp dist/mtban artifacts/mtban-${{ matrix.arch }}
 
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: deb-${{ matrix.arch }}
-          path: artifacts/*.deb
+          name: artifacts-${{ matrix.arch }}
+          path: artifacts/
 
   publish:
     needs: build
@@ -66,7 +67,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq reprepro
 
-      - name: Download all .deb artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -139,7 +140,9 @@ jobs:
             git push origin gh-pages
           fi
 
-      - name: Attach .deb files to GitHub Release
+      - name: Attach files to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*.deb
+          files: |
+            artifacts/*.deb
+            artifacts/mtban-*
