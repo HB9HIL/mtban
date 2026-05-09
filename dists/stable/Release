@@ -2,19 +2,19 @@ Origin: HB9HIL
 Label: mtban
 Suite: stable
 Codename: stable
-Date: Sat, 09 May 2026 14:38:15 UTC
+Date: Sat, 09 May 2026 16:50:06 UTC
 Architectures: amd64
 Components: main
 Description: mtban apt repository
 MD5Sum:
- 1aba773394fdcf0209034130b2267da4 697 main/binary-amd64/Packages
- ea052905b2ea50d71e5ade32e9181b08 486 main/binary-amd64/Packages.gz
+ 4c037437a917fd44ccd923ae76f655be 697 main/binary-amd64/Packages
+ f98e55427c8d7ddd14ebd025e67b94ec 487 main/binary-amd64/Packages.gz
  877a60091470272a4f34c6c92f986954 114 main/binary-amd64/Release
 SHA1:
- 7f3012c110088d661f26c2ea2962f9b624f98a2f 697 main/binary-amd64/Packages
- 192cc78db580c015e02fd50ebdde73fe8e500827 486 main/binary-amd64/Packages.gz
+ f492a725fba8cd47131662177f19710aba89cdf0 697 main/binary-amd64/Packages
+ 40593275593ce28bc50ac4552e0f1b347399a692 487 main/binary-amd64/Packages.gz
  9e03517eda02517e17fcf015118115702cab1382 114 main/binary-amd64/Release
 SHA256:
- ce32517bee68a7c100c2777da52fbd0e6704047688658b53a01e5579f2c7a0c6 697 main/binary-amd64/Packages
- f7e31e4941965bd9a375286b8a9a91b3fba2485a1b28b065c916e5f794a5115d 486 main/binary-amd64/Packages.gz
+ f3c72a43b615f17f616352aafb016259cd19a8b55b1f65fbb165bf3085fa6423 697 main/binary-amd64/Packages
+ 782cd6daf5f5ac0723cbb5d407a42555478a59d7a29c2f760dedb88fe42feec9 487 main/binary-amd64/Packages.gz
  dc2423850f21203b708d27a60e5d4de9c5faa9a3059bbc4088a67110862b196d 114 main/binary-amd64/Release
