@@ -9,8 +9,19 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+          - runner: ubuntu-24.04-arm
+            arch: armhf
+
+    runs-on: ${{ matrix.runner }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -18,7 +29,7 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential debhelper devscripts reprepro golang-any
+          sudo apt-get install -y -qq build-essential debhelper devscripts golang-any
 
       - name: Inject version from tag
         run: |
@@ -29,9 +40,31 @@ jobs:
 
       - name: Build .deb
         run: |
-          dpkg-buildpackage -us -uc -b
+          dpkg-buildpackage -us -uc -b -a${{ matrix.arch }}
           mkdir -p artifacts
           mv ../*.deb ../*.changes ../*.buildinfo artifacts/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.arch }}
+          path: artifacts/*.deb
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq reprepro
+
+      - name: Download all .deb artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
 
       - name: Import GPG signing key
         env:
@@ -76,7 +109,7 @@ jobs:
             "Label: mtban" \
             "Codename: stable" \
             "Suite: stable" \
-            "Architectures: amd64" \
+            "Architectures: amd64 arm64 armhf" \
             "Components: main" \
             "Description: mtban apt repository" \
             "SignWith: ${GPG_KEY_ID}" \
@@ -100,7 +133,7 @@ jobs:
             git push origin gh-pages
           fi
 
-      - name: Attach .deb to GitHub Release
+      - name: Attach .deb files to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/*.deb
