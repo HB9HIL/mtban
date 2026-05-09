@@ -76,7 +76,7 @@ jobs:
             "Label: mtban" \
             "Codename: stable" \
             "Suite: stable" \
-            "Architectures: all" \
+            "Architectures: amd64" \
             "Components: main" \
             "Description: mtban apt repository" \
             "SignWith: ${GPG_KEY_ID}" \
