@@ -1,0 +1,3 @@
+dist/mtban             usr/bin
+mtban.1                usr/share/man/man1
+mtban.conf.example     etc/mtban

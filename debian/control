@@ -1,0 +1,18 @@
+Source: mtban
+Section: net
+Priority: optional
+Maintainer: Fabian Berg <fabian.berg@hb9hil.org>
+Build-Depends: debhelper-compat (= 13), golang-any
+Standards-Version: 4.6.2
+Homepage: https://github.com/hb9hil/mtban
+Vcs-Browser: https://github.com/hb9hil/mtban
+Vcs-Git: https://github.com/hb9hil/mtban.git
+
+Package: mtban
+Architecture: any
+Depends: ${misc:Depends}
+Description: MikroTik address-list manager via REST API
+ Manages MikroTik firewall address-list entries via the RouterOS REST
+ API (RouterOS 7+). Supports ban, unban, and timed entries via
+ MikroTik's built-in timeout. Uses only Go standard library, no external
+ dependencies.

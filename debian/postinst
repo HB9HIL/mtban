@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        if [ ! -f /etc/mtban/mtban.conf ]; then
+            cp /etc/mtban/mtban.conf.example /etc/mtban/mtban.conf
+            chmod 600 /etc/mtban/mtban.conf
+            chown root:root /etc/mtban/mtban.conf
+            echo "Created /etc/mtban/mtban.conf — edit it with your credentials before use."
+        fi
+        ;;
+esac
+
+#DEBHELPER#
+exit 0

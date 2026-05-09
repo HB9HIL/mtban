@@ -1,0 +1,7 @@
+mtban (0.0.1) stable; urgency=low
+
+  * Initial release.
+  * Manage MikroTik address-list entries via REST API.
+  * Supports ban, unban and timed entries via address-list timeout.
+
+ -- Fabian Berg <fabian.berg@hb9hil.org>  Sat, 09 May 2026 12:00:00 +0000

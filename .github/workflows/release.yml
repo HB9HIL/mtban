@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq build-essential debhelper devscripts reprepro
+
+      - name: Inject version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          DEBEMAIL="fabian.berg@hb9hil.org" DEBFULLNAME="Fabian Berg" \
+            dch -b --newversion "$VERSION" --distribution stable \
+                --force-distribution "Release $VERSION"
+
+      - name: Build .deb
+        run: |
+          dpkg-buildpackage -us -uc -b
+          mkdir -p artifacts
+          mv ../*.deb ../*.changes ../*.buildinfo artifacts/
+
+      - name: Import GPG signing key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          echo "trust-model always" >> ~/.gnupg/gpg.conf
+          KEY_ID=$(gpg --list-secret-keys --keyid-format LONG --with-colons \
+                   | awk -F: '/^sec:/ { print $5; exit }')
+          echo "GPG_KEY_ID=$KEY_ID" >> "$GITHUB_ENV"
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+        continue-on-error: true
+
+      - name: Initialize gh-pages if missing
+        run: |
+          if [ ! -d gh-pages/.git ]; then
+            git clone --no-local --branch gh-pages \
+              "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+              gh-pages 2>/dev/null || true
+          fi
+          if [ ! -d gh-pages/.git ]; then
+            mkdir -p gh-pages
+            cd gh-pages
+            git init -b gh-pages
+            git remote add origin \
+              "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          fi
+
+      - name: Update apt repo with reprepro
+        run: |
+          cd gh-pages
+          mkdir -p conf
+          printf '%s\n' \
+            "Origin: ${{ github.repository_owner }}" \
+            "Label: mtban" \
+            "Codename: stable" \
+            "Suite: stable" \
+            "Architectures: all" \
+            "Components: main" \
+            "Description: mtban apt repository" \
+            "SignWith: ${GPG_KEY_ID}" \
+            > conf/distributions
+          for deb in ../artifacts/*.deb; do
+            reprepro -b . includedeb stable "$deb"
+          done
+          gpg --armor --export "${GPG_KEY_ID}" > pubkey.asc
+          touch .nojekyll
+
+      - name: Commit and push gh-pages
+        run: |
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to publish."
+          else
+            git commit -m "Release ${GITHUB_REF_NAME}"
+            git push origin gh-pages
+          fi
+
+      - name: Attach .deb to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.deb

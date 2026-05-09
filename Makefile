@@ -26,7 +26,6 @@ lint:
 	@echo "OK"
 
 clean:
-	rm -rf build/
 	rm -rf dist/
 	rm -rf debian/.debhelper debian/files
 	rm -rf debian/mtban debian/mtban.substvars
