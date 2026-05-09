@@ -1,0 +1,4 @@
+# mtban configuration file
+url      = http://[mikrotik-ip]:[www-service-port]
+username = mtban
+password = your-api-secret

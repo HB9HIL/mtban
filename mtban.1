@@ -1,0 +1,98 @@
+.TH mtban 1 "2026-05-09" "1.0.0" "mtban"
+.SH NAME
+mtban \- manage MikroTik address-list entries via REST API
+.SH SYNOPSIS
+.B mtban
+.RI [ OPTIONS ]
+.B ban
+.I IP
+.br
+.B mtban
+.RI [ OPTIONS ]
+.B unban
+.I IP
+.SH DESCRIPTION
+.B mtban
+adds or removes an IP address from a MikroTik firewall address-list
+using the RouterOS REST API (RouterOS 7+).
+It can be used standalone or called by fail2ban as an action.
+.SH ACTIONS
+.TP
+.B ban \fIIP\fR
+Add \fIIP\fR to the address-list.
+If the entry already exists, its comment (and optionally timeout) is updated.
+.TP
+.B unban \fIIP\fR
+Remove \fIIP\fR from the address-list.
+Does nothing if the entry does not exist.
+.SH OPTIONS
+.TP
+.BI \-\-list " NAME"
+Address-list name on the MikroTik device.
+Default: \fBblocked\fR
+.TP
+.BI \-\-timeout " DURATION"
+MikroTik timeout string (e.g. \fB1h\fR, \fB30m\fR, \fB1d\fR) or in seconds (e.g. \fB3600\fR).
+When set, MikroTik will remove the entry automatically after expiry.
+If omitted, the entry is permanent until explicitly unbanned.
+.TP
+.BI \-\-comment " TEXT"
+Comment stored on the address-list entry.
+Default: \fBmtban\fR
+.TP
+.BI \-\-config " FILE"
+Path to the configuration file.
+Default: \fB/etc/mtban/mtban.conf\fR
+.SH CONFIGURATION
+The configuration file is a simple key=value file:
+.PP
+.nf
+url      = http://[mikrotik-ip]:[www-service-port]
+username = mtban
+password = your-api-secret
+.fi
+.PP
+The file should be owned by root with mode
+.BR 0600 .
+It is created automatically from the example on first install.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+API call failed or configuration could not be read.
+Errors are written to syslog (facility
+.BR user ,
+tag
+.BR mtban ).
+.SH FILES
+.TP
+.B /etc/mtban/mtban.conf
+Runtime configuration with credentials.
+.TP
+.B /etc/mtban/mtban.conf.example
+Template copied to the above on first install.
+.SH EXAMPLES
+Ban an IP for one hour:
+.PP
+.nf
+mtban ban 198.51.100.1 \-\-timeout 1h
+.fi
+.PP
+Remove a ban:
+.PP
+.nf
+mtban unban 198.51.100.1
+.fi
+.PP
+Use a non-default config and list:
+.PP
+.nf
+mtban ban 198.51.100.1 \-\-config /tmp/test.conf \-\-list quarantine
+.fi
+.SH SEE ALSO
+.BR fail2ban\-client (1),
+.BR fail2ban\-server (1)
+.SH AUTHOR
+Fabian Berg <fabian.berg@hb9hil.org>

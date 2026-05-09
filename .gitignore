@@ -1,0 +1,17 @@
+# Build artifacts
+*.deb
+*.changes
+*.buildinfo
+*.dsc
+*.tar.*
+debian/.debhelper/
+debian/files
+debian/mtban/
+debian/mtban.substvars
+debian/debhelper-build-stamp
+
+# Local
+dist/
+build/
+.DS_Store
+mtban.conf
