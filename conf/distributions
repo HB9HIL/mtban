@@ -2,7 +2,7 @@ Origin: HB9HIL
 Label: mtban
 Codename: stable
 Suite: stable
-Architectures: amd64
+Architectures: amd64 arm64 armhf
 Components: main
 Description: mtban apt repository
 SignWith: A436FD869524E889

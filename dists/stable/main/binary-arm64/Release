@@ -1,0 +1,6 @@
+Archive: stable
+Component: main
+Origin: HB9HIL
+Label: mtban
+Architecture: arm64
+Description: mtban apt repository
