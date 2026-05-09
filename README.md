@@ -32,6 +32,15 @@ username = mtban
 password = your-api-secret
 ```
 
+## Help
+
+```
+mtban --help
+
+# or use the manpage
+man mtban
+```
+
 ### MikroTik side
 
 Create a dedicated API user with limited permissions and a firewall
