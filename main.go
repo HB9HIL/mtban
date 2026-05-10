@@ -172,8 +172,7 @@ func loadConfig(configPath string) (map[string]string, error) {
 }
 
 func addressListEndpoint(ip string) string {
-	parsed := net.ParseIP(ip)
-	if parsed != nil && parsed.To4() == nil {
+	if strings.Contains(ip, ":") {
 		return "ipv6/firewall/address-list"
 	}
 	return "ip/firewall/address-list"
@@ -189,16 +188,27 @@ func findID(client *http.Client, cfg map[string]string, listName, ip string) (st
 	}
 
 	needle := net.ParseIP(ip)
+	_, needleNet, _ := net.ParseCIDR(ip)
+
 	for _, entry := range resp {
 		addr, _ := entry["address"].(string)
-		// RouterOS may return addresses with a prefix length (e.g. "::1/128")
-		host, _, err := net.ParseCIDR(addr)
-		if err != nil {
-			host = net.ParseIP(addr)
-		}
-		if host.Equal(needle) {
-			id, _ := entry[".id"].(string)
-			return id, nil
+		if needle != nil {
+			// Plain IP: Equal() handles abbreviated/expanded forms (e.g. :: vs :0000:)
+			host, _, err := net.ParseCIDR(addr)
+			if err != nil {
+				host = net.ParseIP(addr)
+			}
+			if host != nil && host.Equal(needle) {
+				id, _ := entry[".id"].(string)
+				return id, nil
+			}
+		} else if needleNet != nil {
+			// CIDR: normalize both sides to handle case differences
+			_, entryNet, err := net.ParseCIDR(addr)
+			if err == nil && entryNet.String() == needleNet.String() {
+				id, _ := entry[".id"].(string)
+				return id, nil
+			}
 		}
 	}
 	return "", nil
