@@ -1,4 +1,19 @@
 # mtban configuration file
+
+# RouterOS REST API endpoint (http or https)
 url      = http://[mikrotik-ip]:[www-service-port]
 username = mtban
 password = your-api-secret
+
+# Minimum subnet size to ban (default: 32 for IPv4, 128 for IPv6).
+#
+# When an IP is submitted, it is rounded down to the configured prefix length.
+# Manually specifying a larger block (smaller prefix number) always works.
+#
+# Example: ban_v4_subnet = 28
+#   mtban ban 1.2.3.4   → bans 1.2.3.0/28
+#   mtban ban 1.2.3.0/28 → bans 1.2.3.0/28  (explicit block, unchanged)
+#   mtban ban 1.2.0.0/16 → bans 1.2.0.0/16  (larger block, unchanged)
+#
+#ban_v4_subnet = 32
+#ban_v6_subnet = 128

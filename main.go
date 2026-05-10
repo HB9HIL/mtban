@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -51,6 +52,13 @@ func main() {
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
 		},
+	}
+
+	opts.IP, err = applySubnetConfig(opts.IP, cfg)
+	if err != nil {
+		logFailure(logger, opts.Action, opts.IP, err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	existingID, err := findID(client, cfg, opts.List, opts.IP)
@@ -171,11 +179,84 @@ func loadConfig(configPath string) (map[string]string, error) {
 	return cfg, nil
 }
 
+// applySubnetConfig expands a bare IP (or more-specific CIDR) to the minimum
+// block size defined by ban_v4_subnet / ban_v6_subnet in the config.
+// A larger block supplied by the caller always wins (smaller prefix number takes
+// precedence), so manual /16 bans still work even when the config is set to /28.
+func applySubnetConfig(ip string, cfg map[string]string) (string, error) {
+	isIPv6 := isIPv6(ip)
+	totalBits := 32
+	configKey := "ban_v4_subnet"
+	if isIPv6 {
+		totalBits = 128
+		configKey = "ban_v6_subnet"
+	}
+
+	configuredPrefix := totalBits
+	if v := cfg[configKey]; v != "" {
+		n, err := strconv.Atoi(strings.TrimPrefix(v, "/"))
+		if err != nil || n < 0 || n > totalBits {
+			return "", fmt.Errorf("invalid %s: %q", configKey, v)
+		}
+		configuredPrefix = n
+	}
+
+	isBareIP := !strings.Contains(ip, "/")
+	inputPrefix := totalBits
+	var hostIP net.IP
+
+	if isBareIP {
+		hostIP = net.ParseIP(ip)
+		if hostIP == nil {
+			return "", fmt.Errorf("invalid address: %q", ip)
+		}
+	} else {
+		var ipNet *net.IPNet
+		var err error
+		hostIP, ipNet, err = net.ParseCIDR(ip)
+		if err != nil {
+			return "", fmt.Errorf("invalid address: %q", ip)
+		}
+		ones, _ := ipNet.Mask.Size()
+		inputPrefix = ones
+	}
+
+	// Smaller prefix number = larger block; the larger block always wins.
+	effectivePrefix := configuredPrefix
+	if inputPrefix < configuredPrefix {
+		effectivePrefix = inputPrefix
+	}
+
+	// Bare host IP at default prefix — nothing to expand, return as-is.
+	if effectivePrefix == totalBits && isBareIP {
+		return ip, nil
+	}
+
+	// net.ParseIP stores IPv4 as a 16-byte IPv4-in-IPv6 slice; net.CIDRMask(n, 32)
+	// produces a 4-byte mask. Mask() returns nil when lengths differ, so normalize first.
+	if !isIPv6 {
+		if v4 := hostIP.To4(); v4 != nil {
+			hostIP = v4
+		}
+	}
+
+	mask := net.CIDRMask(effectivePrefix, totalBits)
+	networkAddr := hostIP.Mask(mask)
+	if networkAddr == nil {
+		return "", fmt.Errorf("failed to apply mask to %q", ip)
+	}
+	return fmt.Sprintf("%s/%d", networkAddr.String(), effectivePrefix), nil
+}
+
 func addressListEndpoint(ip string) string {
-	if strings.Contains(ip, ":") {
+	if isIPv6(ip) {
 		return "ipv6/firewall/address-list"
 	}
 	return "ip/firewall/address-list"
+}
+
+func isIPv6(ip string) bool {
+	return strings.Contains(ip, ":")
 }
 
 func findID(client *http.Client, cfg map[string]string, listName, ip string) (string, error) {
