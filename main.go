@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log/syslog"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -62,7 +63,7 @@ func main() {
 	case "ban":
 		err = ban(client, cfg, opts, existingID)
 	case "unban":
-		err = unban(client, cfg, existingID)
+		err = unban(client, cfg, opts.IP, existingID)
 	default:
 		err = fmt.Errorf("unknown action: %s", opts.Action)
 	}
@@ -170,22 +171,37 @@ func loadConfig(configPath string) (map[string]string, error) {
 	return cfg, nil
 }
 
+func addressListEndpoint(ip string) string {
+	parsed := net.ParseIP(ip)
+	if parsed != nil && parsed.To4() == nil {
+		return "ipv6/firewall/address-list"
+	}
+	return "ip/firewall/address-list"
+}
+
 func findID(client *http.Client, cfg map[string]string, listName, ip string) (string, error) {
 	query := url.Values{}
 	query.Set("list", listName)
-	query.Set("address", ip)
 
-	resp, err := api(client, cfg, http.MethodGet, "ip/firewall/address-list?"+query.Encode(), nil)
+	resp, err := api(client, cfg, http.MethodGet, addressListEndpoint(ip)+"?"+query.Encode(), nil)
 	if err != nil {
 		return "", err
 	}
 
-	if len(resp) == 0 {
-		return "", nil
+	needle := net.ParseIP(ip)
+	for _, entry := range resp {
+		addr, _ := entry["address"].(string)
+		// RouterOS may return addresses with a prefix length (e.g. "::1/128")
+		host, _, err := net.ParseCIDR(addr)
+		if err != nil {
+			host = net.ParseIP(addr)
+		}
+		if host.Equal(needle) {
+			id, _ := entry[".id"].(string)
+			return id, nil
+		}
 	}
-
-	id, _ := resp[0][".id"].(string)
-	return id, nil
+	return "", nil
 }
 
 func ban(client *http.Client, cfg map[string]string, opts options, existingID string) error {
@@ -194,7 +210,7 @@ func ban(client *http.Client, cfg map[string]string, opts options, existingID st
 		if opts.Timeout != "" {
 			patch["timeout"] = opts.Timeout
 		}
-		_, err := api(client, cfg, http.MethodPatch, "ip/firewall/address-list/"+existingID, patch)
+		_, err := api(client, cfg, http.MethodPatch, addressListEndpoint(opts.IP)+"/"+existingID, patch)
 		return err
 	}
 
@@ -207,16 +223,16 @@ func ban(client *http.Client, cfg map[string]string, opts options, existingID st
 		data["timeout"] = opts.Timeout
 	}
 
-	_, err := api(client, cfg, http.MethodPut, "ip/firewall/address-list", data)
+	_, err := api(client, cfg, http.MethodPut, addressListEndpoint(opts.IP), data)
 	return err
 }
 
-func unban(client *http.Client, cfg map[string]string, existingID string) error {
+func unban(client *http.Client, cfg map[string]string, ip, existingID string) error {
 	if existingID == "" {
 		return nil
 	}
 
-	_, err := api(client, cfg, http.MethodDelete, "ip/firewall/address-list/"+existingID, nil)
+	_, err := api(client, cfg, http.MethodDelete, addressListEndpoint(ip)+"/"+existingID, nil)
 	return err
 }
 
