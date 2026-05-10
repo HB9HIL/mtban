@@ -30,7 +30,21 @@ Edit `/etc/mtban/mtban.conf` (created automatically on install, mode `0600`):
 url      = http://[mikrotik-ip]:[www-service-port]
 username = mtban
 password = your-api-secret
+
+# Optional: minimum subnet size to ban (default: 32 for IPv4, 128 for IPv6).
+# When an IP is submitted, it is rounded down to the configured prefix.
+# Manually specifying a larger block always works regardless of this setting.
+#
+#ban_v4_subnet = 28
+#ban_v6_subnet = 64
 ```
+
+### Subnet banning
+
+`ban_v4_subnet` and `ban_v6_subnet` control the smallest block that gets banned.
+With `ban_v4_subnet = 28`, banning `1.2.3.4` will actually ban `1.2.3.0/28` —
+the entire /28 that contains that address. Passing a larger block explicitly
+(e.g. `mtban ban 10.0.0.0/8`) always works and is not affected by this setting.
 
 ## Help
 
