@@ -1,16 +1,16 @@
 Package: mtban
-Version: 1.1.2
+Version: 1.1.3
 Architecture: amd64
 Maintainer: Fabian Berg <fabian.berg@hb9hil.org>
 Installed-Size: 6093
 Homepage: https://github.com/hb9hil/mtban
 Priority: optional
 Section: net
-Filename: pool/main/m/mtban/mtban_1.1.2_amd64.deb
-Size: 2236560
-SHA256: f4d996503eacf966f55065ee8508b06c5de4c34d84ec2eab1834abfb7d7a6959
-SHA1: e3b25ba8c6858ea005eb697d11aeb463728c700e
-MD5sum: 168576dddcff9315aff8dbaf4f81e049
+Filename: pool/main/m/mtban/mtban_1.1.3_amd64.deb
+Size: 2236542
+SHA256: e7c074d98ac04cc1fe2e06c121bedbb453bf25cce0d51560b3f809d3de6d4f4f
+SHA1: 71a01c7f2bcc044585176d0aaad932414da0c845
+MD5sum: f3f01739200c359e8ce78846e597527e
 Description: MikroTik address-list manager via REST API
  Manages MikroTik firewall address-list entries via the RouterOS REST
  API (RouterOS 7+). Supports ban, unban, and timed entries via
