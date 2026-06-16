@@ -130,6 +130,9 @@ go run . unban 198.51.100.1 --config /tmp/mtban.conf
 go build -o dist/mtban .
 ./dist/mtban ban 198.51.100.1 --config /tmp/mtban.conf --timeout 60
 ./dist/mtban unban 198.51.100.1 --config /tmp/mtban.conf
+
+# to run the tests
+make test
 ```
 
 ## Contributing
