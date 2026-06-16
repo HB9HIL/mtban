@@ -19,7 +19,7 @@ package:
 		dpkg-buildpackage -us -uc -b && \
 		mv ../*.deb ../*.changes ../*.buildinfo dist/'
 
-# Sanity-check the Python script (works natively on macOS)
+# Lint: gofmt check + tests
 lint:
 	@test -z "$$(gofmt -l .)" || (echo "Run gofmt on changed files" && gofmt -l . && false)
 	$(GO) test ./...
