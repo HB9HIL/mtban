@@ -1,6 +1,6 @@
 IMAGE := debian:bookworm
 
-.PHONY: build package shell lint clean
+.PHONY: build package shell test clean
 
 GO ?= go
 GOFLAGS ?= -trimpath
@@ -19,8 +19,8 @@ package:
 		dpkg-buildpackage -us -uc -b && \
 		mv ../*.deb ../*.changes ../*.buildinfo dist/'
 
-# Lint: gofmt check + tests
-lint:
+# gofmt check + tests
+test:
 	@test -z "$$(gofmt -l .)" || (echo "Run gofmt on changed files" && gofmt -l . && false)
 	$(GO) test ./...
 	@echo "OK"
