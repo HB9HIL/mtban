@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -355,8 +354,7 @@ func api(
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	auth := base64.StdEncoding.EncodeToString([]byte(cfg["username"] + ":" + cfg["password"]))
-	req.Header.Set("Authorization", "Basic "+auth)
+	req.SetBasicAuth(cfg["username"], cfg["password"])
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := client.Do(req)
