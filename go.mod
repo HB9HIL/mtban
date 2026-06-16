@@ -1,3 +1,3 @@
 module github.com/hb9hil/mtban
 
-go 1.22
+go 1.26

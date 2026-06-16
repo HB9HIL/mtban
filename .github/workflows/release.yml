@@ -43,10 +43,14 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential debhelper devscripts golang-any
+          sudo apt-get install -y -qq build-essential debhelper devscripts
 
       - name: Inject version from tag
         run: |
