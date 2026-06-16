@@ -5,6 +5,8 @@ Can be used standalone or as a fail2ban action as it was designed for.
 
 ## Install
 
+### Debian/Ubuntu
+
 ```bash
 sudo install -d -m 0755 /etc/apt/keyrings
 curl -fsSL https://hb9hil.github.io/mtban/pubkey.asc \
@@ -20,6 +22,15 @@ EOF
 
 sudo apt update
 sudo apt install mtban
+```
+
+### Arch
+
+```
+yay mtban
+
+# or if you prefer the prebuilt binary
+yay mtban-bin
 ```
 
 ## Configure
