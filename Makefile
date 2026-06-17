@@ -4,11 +4,12 @@ IMAGE := debian:bookworm
 
 GO ?= go
 GOFLAGS ?= -trimpath
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null | sed 's/^v//' || echo "dev")
 
 # Build binary into dist/
 build:
 	mkdir -p dist
-	$(GO) build $(GOFLAGS) -o dist/mtban .
+	$(GO) build $(GOFLAGS) -ldflags "-X main.version=$(VERSION)" -o dist/mtban .
 
 # Build .deb locally inside a Debian container (works on macOS via Docker/Colima)
 package:

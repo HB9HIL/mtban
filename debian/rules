@@ -14,9 +14,11 @@ else
   GOARM  :=
 endif
 
+DEB_VERSION := $(shell dpkg-parsechangelog --show-field Version)
+
 override_dh_auto_build:
 	mkdir -p dist
-	GOARCH=$(GOARCH) GOARM=$(GOARM) go build -trimpath -ldflags "-s -w" -o dist/mtban .
+	GOARCH=$(GOARCH) GOARM=$(GOARM) go build -trimpath -ldflags "-s -w -X main.version=$(DEB_VERSION)" -o dist/mtban .
 
 override_dh_auto_install:
 

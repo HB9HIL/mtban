@@ -20,6 +20,9 @@ import (
 
 const defaultConfigPath = "/etc/mtban/mtban.conf"
 
+var version = "dev"
+var usage_string = "usage: mtban [--list NAME] [--timeout DURATION] [--comment TEXT] [--config FILE] [--version] <ban|unban> <ip>"
+
 type options struct {
 	Action  string
 	IP      string
@@ -31,6 +34,13 @@ type options struct {
 
 func main() {
 	logger, _ := syslog.New(syslog.LOG_USER|syslog.LOG_INFO, "mtban")
+
+	for _, arg := range os.Args[1:] {
+		if arg == "--version" {
+			fmt.Println("mtban " + version)
+			os.Exit(0)
+		}
+	}
 
 	opts, err := parseArgs(os.Args[1:])
 	if err != nil {
@@ -97,7 +107,7 @@ func parseArgs(args []string) (options, error) {
 		arg := args[i]
 
 		if arg == "--help" || arg == "-h" {
-			return opts, errors.New("usage: mtban [--list NAME] [--timeout DURATION] [--comment TEXT] [--config FILE] <ban|unban> <ip>")
+			return opts, errors.New(usage_string)
 		}
 
 		if strings.HasPrefix(arg, "--") {
@@ -133,7 +143,7 @@ func parseArgs(args []string) (options, error) {
 	}
 
 	if len(positionals) != 2 {
-		return opts, errors.New("usage: mtban [--list NAME] [--timeout DURATION] [--comment TEXT] [--config FILE] <ban|unban> <ip>")
+		return opts, errors.New(usage_string)
 	}
 
 	opts.Action = positionals[0]
