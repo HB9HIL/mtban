@@ -1,16 +1,16 @@
 Package: mtban
-Version: 1.1.3
+Version: 1.1.4
 Architecture: armhf
 Maintainer: Fabian Berg <fabian.berg@hb9hil.org>
 Installed-Size: 5909
 Homepage: https://github.com/hb9hil/mtban
 Priority: optional
 Section: net
-Filename: pool/main/m/mtban/mtban_1.1.3_armhf.deb
-Size: 2075180
-SHA256: 2fe478a488fd5976445966b5ee701cda0de0592ba2a7aae697047b157b23dda2
-SHA1: 5cce99910768c5f625689da164392d3b5bfb0805
-MD5sum: ffa1b4c38a012c4f098b65e7a124c1db
+Filename: pool/main/m/mtban/mtban_1.1.4_armhf.deb
+Size: 2075760
+SHA256: 1df8458db0e0284816ada848f7cbd1eb4d5215382755da3e653af4491f5f0fda
+SHA1: 63e6c43ee55cfa64c22f74d26b504e8952eba78f
+MD5sum: 604997d1f491e3fbda87f3d9eff00a86
 Description: MikroTik address-list manager via REST API
  Manages MikroTik firewall address-list entries via the RouterOS REST
  API (RouterOS 7+). Supports ban, unban, and timed entries via
