@@ -37,7 +37,9 @@ func main() {
 
 	for _, arg := range os.Args[1:] {
 		if arg == "--version" {
-			fmt.Println("mtban " + version)
+			fmt.Println("mtban Version: " + version)
+			fmt.Println("A tool for managing MikroTik firewall address lists with ease.")
+			fmt.Println("MIT License | https://github.com/hb9hil/mtban")
 			os.Exit(0)
 		}
 	}
